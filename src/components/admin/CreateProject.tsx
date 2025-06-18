@@ -75,65 +75,113 @@ export function CreateProject() {
   ];
 
   const handleInputChange = (field: string, value: any) => {
-    setProjectData(prev => ({
-      ...prev,
-      [field]: value
-    }));
+    try {
+      setProjectData(prev => ({
+        ...prev,
+        [field]: value
+      }));
+    } catch (error) {
+      console.error("Error updating project data:", error);
+      toast({
+        title: "Update Error",
+        description: "Failed to update project data",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSave = async () => {
-    setIsLoading(true);
-    // API call would go here
-    console.log("Creating project:", projectData);
-    setTimeout(() => {
-      setIsLoading(false);
+    try {
+      setIsLoading(true);
+      // API call would go here
+      console.log("Creating project:", projectData);
+      
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
       toast({
         title: "Success",
         description: "Project created successfully!",
       });
       navigate("/admin/project-list");
-    }, 1000);
+    } catch (error) {
+      console.error("Error creating project:", error);
+      toast({
+        title: "Error",
+        description: "Failed to create project. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleNext = () => {
-    if (currentStep < steps.length - 1) {
-      setCurrentStep(currentStep + 1);
+    try {
+      if (currentStep < steps.length - 1) {
+        setCurrentStep(currentStep + 1);
+        toast({
+          title: "Progress Saved",
+          description: `Moving to ${steps[currentStep + 1].title}`,
+        });
+      }
+    } catch (error) {
+      console.error("Error navigating to next step:", error);
       toast({
-        title: "Progress Saved",
-        description: `Moving to ${steps[currentStep + 1].title}`,
+        title: "Navigation Error",
+        description: "Failed to move to next step",
+        variant: "destructive",
       });
     }
   };
 
   const handleSelectAll = (type: 'countries' | 'states' | 'cities' | 'localAreas') => {
-    const typeMap = {
-      countries: { available: availableCountries, selected: 'selectedCountries' },
-      states: { available: availableStates, selected: 'selectedStates' },
-      cities: { available: availableCities, selected: 'selectedCities' },
-      localAreas: { available: availableLocalAreas, selected: 'selectedLocalAreas' }
-    };
+    try {
+      const typeMap = {
+        countries: { available: availableCountries, selected: 'selectedCountries' },
+        states: { available: availableStates, selected: 'selectedStates' },
+        cities: { available: availableCities, selected: 'selectedCities' },
+        localAreas: { available: availableLocalAreas, selected: 'selectedLocalAreas' }
+      };
 
-    const { available, selected } = typeMap[type];
-    handleInputChange(selected, available);
-    toast({
-      title: "Selection Updated",
-      description: `All ${type} selected`,
-    });
+      const { available, selected } = typeMap[type];
+      handleInputChange(selected, available);
+      toast({
+        title: "Selection Updated",
+        description: `All ${type} selected`,
+      });
+    } catch (error) {
+      console.error("Error selecting all:", error);
+      toast({
+        title: "Selection Error",
+        description: "Failed to select all items",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleDeselectAll = (type: 'countries' | 'states' | 'cities' | 'localAreas') => {
-    const typeMap = {
-      countries: 'selectedCountries',
-      states: 'selectedStates',
-      cities: 'selectedCities',
-      localAreas: 'selectedLocalAreas'
-    };
+    try {
+      const typeMap = {
+        countries: 'selectedCountries',
+        states: 'selectedStates',
+        cities: 'selectedCities',
+        localAreas: 'selectedLocalAreas'
+      };
 
-    handleInputChange(typeMap[type], []);
-    toast({
-      title: "Selection Updated",
-      description: `All ${type} deselected`,
-    });
+      handleInputChange(typeMap[type], []);
+      toast({
+        title: "Selection Updated",
+        description: `All ${type} deselected`,
+      });
+    } catch (error) {
+      console.error("Error deselecting all:", error);
+      toast({
+        title: "Selection Error",
+        description: "Failed to deselect all items",
+        variant: "destructive",
+      });
+    }
   };
 
   const renderLocationSelectionStep = (
