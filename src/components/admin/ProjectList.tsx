@@ -2,16 +2,10 @@
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Eye, ExternalLink, Pencil, Search, Server, Trash, MoreHorizontal, Plus, Zap } from "lucide-react";
+import { Eye, ExternalLink, Pencil, Search, Server, Trash, Plus, Zap, Globe, Laptop, Wrench } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import '@fortawesome/fontawesome-free/css/all.min.css';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import {
   Pagination,
   PaginationContent,
@@ -245,6 +239,7 @@ export function ProjectList() {
         {projects.map((project) => (
           <Card key={project._id} className="hover:shadow-lg transition-shadow duration-200 border border-gray-200">
             <CardContent className="p-6">
+              {/* Header with delete button */}
               <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
                   <i className={`fas fa-${project.defaultFasFaIcon} text-2xl`}></i>
@@ -253,35 +248,13 @@ export function ProjectList() {
                     <p className="text-xs text-gray-500">{project.serviceType}</p>
                   </div>
                 </div>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                      <MoreHorizontal className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-40">
-                    <DropdownMenuItem onClick={() => handleVisitLocalSite(project._id)}>
-                      <i className="fas fa-laptop-code mr-2 h-4 w-4" />
-                      Visit Local Site
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleVisitLiveSite(project._id)}>
-                      <i className="fas fa-globe mr-2 h-4 w-4" />
-                      Visit Live Site
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleVisitServices(project._id)}>
-                      <i className="fas fa-toolbox mr-2 h-4 w-4" />
-                      Visit Services
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleUpdateProject(project._id)}>
-                      <i className="fas fa-pen mr-2 h-4 w-4 text-blue-600" />
-                      Update Project
-                    </DropdownMenuItem>
-                    <DropdownMenuItem className="text-red-600">
-                      <Trash className="mr-2 h-4 w-4" />
-                      Delete
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                >
+                  <Trash className="h-4 w-4" />
+                </Button>
               </div>
 
               <div className="space-y-3">
@@ -299,11 +272,55 @@ export function ProjectList() {
                   </span>
                 </div>
 
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between mb-4">
                   <span className="text-xs text-gray-500">Images</span>
                   <Badge className="bg-purple-100 text-purple-700 text-xs px-2 py-1">
                     {project.images?.length || 0}
                   </Badge>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="space-y-2 pt-2 border-t">
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-8"
+                      onClick={() => handleVisitLocalSite(project._id)}
+                    >
+                      <Laptop className="h-3 w-3 mr-1" />
+                      Local Site
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-8"
+                      onClick={() => handleVisitLiveSite(project._id)}
+                    >
+                      <Globe className="h-3 w-3 mr-1" />
+                      Live Site
+                    </Button>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-8"
+                      onClick={() => handleVisitServices(project._id)}
+                    >
+                      <Wrench className="h-3 w-3 mr-1" />
+                      Services
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="text-xs h-8 text-blue-600 hover:text-blue-700"
+                      onClick={() => handleUpdateProject(project._id)}
+                    >
+                      <Pencil className="h-3 w-3 mr-1" />
+                      Update
+                    </Button>
+                  </div>
                 </div>
               </div>
             </CardContent>
