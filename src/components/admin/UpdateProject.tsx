@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -7,16 +6,18 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import { ArrowLeft, ArrowRight, Edit3, Save, Eye, CheckCircle } from "lucide-react";
+import { ArrowLeft, ArrowRight, Edit3, Save, Eye, CheckCircle, CheckSquare, Square } from "lucide-react";
 import { useParams, useNavigate } from "react-router-dom";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
 
 export function UpdateProject() {
   const { projectId } = useParams();
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const { toast } = useToast();
 
   // Mock data - replace with actual API call based on projectId
   const [projectData, setProjectData] = useState({
@@ -36,6 +37,35 @@ export function UpdateProject() {
     isCity: false,
     isLocal: true
   });
+
+  // Mock data for available options
+  const [availableCountries] = useState([
+    { name: "United States", id: "US" },
+    { name: "Canada", id: "CA" },
+    { name: "United Kingdom", id: "UK" },
+    { name: "Australia", id: "AU" }
+  ]);
+
+  const [availableStates] = useState([
+    { name: "California", id: "CA" },
+    { name: "New York", id: "NY" },
+    { name: "Texas", id: "TX" },
+    { name: "Florida", id: "FL" }
+  ]);
+
+  const [availableCities] = useState([
+    { name: "Los Angeles", id: "LA" },
+    { name: "San Francisco", id: "SF" },
+    { name: "New York City", id: "NYC" },
+    { name: "Miami", id: "MIA" }
+  ]);
+
+  const [availableLocalAreas] = useState([
+    { name: "Downtown", id: "DT" },
+    { name: "Hollywood", id: "HW" },
+    { name: "Beverly Hills", id: "BH" },
+    { name: "Santa Monica", id: "SM" }
+  ]);
 
   const steps = [
     { title: "Project Information", icon: "info" },
@@ -59,8 +89,156 @@ export function UpdateProject() {
     console.log("Saving project:", projectData);
     setTimeout(() => {
       setIsLoading(false);
+      toast({
+        title: "Success",
+        description: "Project updated successfully!",
+      });
       navigate("/admin/project-list");
     }, 1000);
+  };
+
+  const handleNext = () => {
+    if (currentStep < steps.length - 1) {
+      setCurrentStep(currentStep + 1);
+      toast({
+        title: "Progress Saved",
+        description: `Moving to ${steps[currentStep + 1].title}`,
+      });
+    }
+  };
+
+  const handleSelectAll = (type: 'countries' | 'states' | 'cities' | 'localAreas') => {
+    const typeMap = {
+      countries: { available: availableCountries, selected: 'selectedCountries' },
+      states: { available: availableStates, selected: 'selectedStates' },
+      cities: { available: availableCities, selected: 'selectedCities' },
+      localAreas: { available: availableLocalAreas, selected: 'selectedLocalAreas' }
+    };
+
+    const { available, selected } = typeMap[type];
+    handleInputChange(selected, available);
+    toast({
+      title: "Selection Updated",
+      description: `All ${type} selected`,
+    });
+  };
+
+  const handleDeselectAll = (type: 'countries' | 'states' | 'cities' | 'localAreas') => {
+    const typeMap = {
+      countries: 'selectedCountries',
+      states: 'selectedStates',
+      cities: 'selectedCities',
+      localAreas: 'selectedLocalAreas'
+    };
+
+    handleInputChange(typeMap[type], []);
+    toast({
+      title: "Selection Updated",
+      description: `All ${type} deselected`,
+    });
+  };
+
+  const renderLocationSelectionStep = (
+    title: string,
+    isEnabledField: string,
+    selectedField: string,
+    availableOptions: any[],
+    type: 'countries' | 'states' | 'cities' | 'localAreas'
+  ) => {
+    const selectedItems = projectData[selectedField];
+    const allSelected = selectedItems.length === availableOptions.length;
+
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center space-x-3">
+          <Checkbox
+            id={isEnabledField}
+            checked={projectData[isEnabledField]}
+            onCheckedChange={(checked) => handleInputChange(isEnabledField, checked)}
+          />
+          <Label htmlFor={isEnabledField}>{title}</Label>
+        </div>
+        
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <Label>Selected {title.split(' ')[1]}s</Label>
+            <div className="flex gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => handleSelectAll(type)}
+                disabled={allSelected}
+                className="flex items-center gap-2"
+              >
+                <CheckSquare className="h-3 w-3" />
+                Select All
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => handleDeselectAll(type)}
+                disabled={selectedItems.length === 0}
+                className="flex items-center gap-2"
+              >
+                <Square className="h-3 w-3" />
+                Deselect All
+              </Button>
+            </div>
+          </div>
+          
+          <div className="mt-2 flex flex-wrap gap-2 min-h-[40px] p-3 border rounded-lg bg-gray-50">
+            {selectedItems.length > 0 ? (
+              selectedItems.map((item) => (
+                <Badge key={item.id} variant="secondary" className="px-3 py-1 flex items-center gap-2">
+                  {item.name}
+                  <button
+                    onClick={() => {
+                      const updated = selectedItems.filter(i => i.id !== item.id);
+                      handleInputChange(selectedField, updated);
+                    }}
+                    className="ml-1 text-red-500 hover:text-red-700 font-bold"
+                  >
+                    ×
+                  </button>
+                </Badge>
+              ))
+            ) : (
+              <p className="text-sm text-gray-500">No {title.split(' ')[1].toLowerCase()}s selected</p>
+            )}
+          </div>
+          
+          <div className="mt-4">
+            <Label className="text-sm font-medium">Available Options</Label>
+            <div className="grid grid-cols-2 gap-2 mt-2">
+              {availableOptions.map((option) => {
+                const isSelected = selectedItems.some(item => item.id === option.id);
+                return (
+                  <Button
+                    key={option.id}
+                    type="button"
+                    variant={isSelected ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => {
+                      if (isSelected) {
+                        const updated = selectedItems.filter(item => item.id !== option.id);
+                        handleInputChange(selectedField, updated);
+                      } else {
+                        handleInputChange(selectedField, [...selectedItems, option]);
+                      }
+                    }}
+                    className="justify-start"
+                  >
+                    {option.name}
+                  </Button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   };
 
   const renderStepContent = () => {
@@ -167,192 +345,39 @@ export function UpdateProject() {
         );
 
       case 1: // Country Selection
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center space-x-3">
-              <Checkbox
-                id="isCountry"
-                checked={projectData.isCountry}
-                onCheckedChange={(checked) => handleInputChange("isCountry", checked)}
-              />
-              <Label htmlFor="isCountry">Enable Country Level Service</Label>
-            </div>
-            
-            <div>
-              <Label>Selected Countries</Label>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {projectData.selectedCountries.map((country) => (
-                  <Badge key={country.id} variant="secondary" className="px-3 py-1">
-                    {country.name}
-                    <button
-                      onClick={() => {
-                        const updated = projectData.selectedCountries.filter(c => c.id !== country.id);
-                        handleInputChange("selectedCountries", updated);
-                      }}
-                      className="ml-2 text-red-500 hover:text-red-700"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="mt-3"
-                onClick={() => {
-                  // Mock adding a country
-                  const newCountry = { name: "Canada", id: "CA" };
-                  if (!projectData.selectedCountries.find(c => c.id === newCountry.id)) {
-                    handleInputChange("selectedCountries", [...projectData.selectedCountries, newCountry]);
-                  }
-                }}
-              >
-                Add Country
-              </Button>
-            </div>
-          </div>
+        return renderLocationSelectionStep(
+          "Enable Country Level Service",
+          "isCountry",
+          "selectedCountries",
+          availableCountries,
+          "countries"
         );
 
       case 2: // State Selection
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center space-x-3">
-              <Checkbox
-                id="isState"
-                checked={projectData.isState}
-                onCheckedChange={(checked) => handleInputChange("isState", checked)}
-              />
-              <Label htmlFor="isState">Enable State Level Service</Label>
-            </div>
-            
-            <div>
-              <Label>Selected States</Label>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {projectData.selectedStates.map((state) => (
-                  <Badge key={state.id} variant="secondary" className="px-3 py-1">
-                    {state.name}
-                    <button
-                      onClick={() => {
-                        const updated = projectData.selectedStates.filter(s => s.id !== state.id);
-                        handleInputChange("selectedStates", updated);
-                      }}
-                      className="ml-2 text-red-500 hover:text-red-700"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="mt-3"
-                onClick={() => {
-                  const newState = { name: "New York", id: "NY" };
-                  if (!projectData.selectedStates.find(s => s.id === newState.id)) {
-                    handleInputChange("selectedStates", [...projectData.selectedStates, newState]);
-                  }
-                }}
-              >
-                Add State
-              </Button>
-            </div>
-          </div>
+        return renderLocationSelectionStep(
+          "Enable State Level Service",
+          "isState",
+          "selectedStates",
+          availableStates,
+          "states"
         );
 
       case 3: // City Selection
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center space-x-3">
-              <Checkbox
-                id="isCity"
-                checked={projectData.isCity}
-                onCheckedChange={(checked) => handleInputChange("isCity", checked)}
-              />
-              <Label htmlFor="isCity">Enable City Level Service</Label>
-            </div>
-            
-            <div>
-              <Label>Selected Cities</Label>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {projectData.selectedCities.map((city) => (
-                  <Badge key={city.id} variant="secondary" className="px-3 py-1">
-                    {city.name}
-                    <button
-                      onClick={() => {
-                        const updated = projectData.selectedCities.filter(c => c.id !== city.id);
-                        handleInputChange("selectedCities", updated);
-                      }}
-                      className="ml-2 text-red-500 hover:text-red-700"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="mt-3"
-                onClick={() => {
-                  const newCity = { name: "San Francisco", id: "SF" };
-                  if (!projectData.selectedCities.find(c => c.id === newCity.id)) {
-                    handleInputChange("selectedCities", [...projectData.selectedCities, newCity]);
-                  }
-                }}
-              >
-                Add City
-              </Button>
-            </div>
-          </div>
+        return renderLocationSelectionStep(
+          "Enable City Level Service",
+          "isCity",
+          "selectedCities",
+          availableCities,
+          "cities"
         );
 
       case 4: // Local Area Selection
-        return (
-          <div className="space-y-6">
-            <div className="flex items-center space-x-3">
-              <Checkbox
-                id="isLocal"
-                checked={projectData.isLocal}
-                onCheckedChange={(checked) => handleInputChange("isLocal", checked)}
-              />
-              <Label htmlFor="isLocal">Enable Local Area Service</Label>
-            </div>
-            
-            <div>
-              <Label>Selected Local Areas</Label>
-              <div className="mt-2 flex flex-wrap gap-2">
-                {projectData.selectedLocalAreas.map((area) => (
-                  <Badge key={area.id} variant="secondary" className="px-3 py-1">
-                    {area.name}
-                    <button
-                      onClick={() => {
-                        const updated = projectData.selectedLocalAreas.filter(a => a.id !== area.id);
-                        handleInputChange("selectedLocalAreas", updated);
-                      }}
-                      className="ml-2 text-red-500 hover:text-red-700"
-                    >
-                      ×
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-              <Button
-                type="button"
-                variant="outline"
-                className="mt-3"
-                onClick={() => {
-                  const newArea = { name: "Beverly Hills", id: "BH" };
-                  if (!projectData.selectedLocalAreas.find(a => a.id === newArea.id)) {
-                    handleInputChange("selectedLocalAreas", [...projectData.selectedLocalAreas, newArea]);
-                  }
-                }}
-              >
-                Add Local Area
-              </Button>
-            </div>
-          </div>
+        return renderLocationSelectionStep(
+          "Enable Local Area Service",
+          "isLocal",
+          "selectedLocalAreas",
+          availableLocalAreas,
+          "localAreas"
         );
 
       case 5: // Preview
@@ -542,7 +567,7 @@ export function UpdateProject() {
                       </Button>
                     ) : (
                       <Button
-                        onClick={() => setCurrentStep(Math.min(steps.length - 1, currentStep + 1))}
+                        onClick={handleNext}
                         className="bg-purple-600 hover:bg-purple-700 text-white flex items-center gap-2"
                       >
                         Next

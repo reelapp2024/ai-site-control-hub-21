@@ -21,7 +21,7 @@ import {
   PaginationPrevious,
 } from "@/components/ui/pagination";
 import { httpFile } from "../../config.js";
-import { toast } from "react-toastify";
+import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
 
 export function ProjectList() {
@@ -33,6 +33,7 @@ export function ProjectList() {
   const [projects, setProjects] = useState([]);
   const [Activeprojects, setActiveProjects] = useState([]);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   // Fetch projects from API with pagination and search
   useEffect(() => {
@@ -40,7 +41,11 @@ export function ProjectList() {
       try {
         const token = localStorage.getItem("token");
         if (!token) {
-          toast.error("No authentication token found");
+          toast({
+            title: "Authentication Error",
+            description: "No authentication token found",
+            variant: "destructive",
+          });
           navigate("/login");
           return;
         }
@@ -61,19 +66,31 @@ export function ProjectList() {
         );
 
         if (res.status === 401) {
-          toast.error("Invalid token");
+          toast({
+            title: "Authentication Error",
+            description: "Invalid token",
+            variant: "destructive",
+          });
           localStorage.clear();
           navigate("/login");
           return;
         }
 
         if (res.status === 400) {
-          toast.error(res.data.message || "Invalid request");
+          toast({
+            title: "Request Error",
+            description: res.data.message || "Invalid request",
+            variant: "destructive",
+          });
           return;
         }
 
         if (res.status === 404) {
-          toast.error(res.data.message || "User not found");
+          toast({
+            title: "User Not Found",
+            description: res.data.message || "User not found",
+            variant: "destructive",
+          });
           navigate("/login");
           return;
         }
@@ -83,13 +100,17 @@ export function ProjectList() {
         setTotalPages(res.data.totalPages || 1);
         setTotalProjects(res.data.total || 0);
       } catch (err) {
-        toast.error(err.response?.data?.message || "Failed to fetch projects");
+        toast({
+          title: "Error",
+          description: err.response?.data?.message || "Failed to fetch projects",
+          variant: "destructive",
+        });
         navigate("/login");
       }
     };
 
     fetchProjects();
-  }, [navigate, currentPage, limit, searchTerm]);
+  }, [navigate, currentPage, limit, searchTerm, toast]);
 
   // Handle page change
   const handlePageChange = (pageNumber) => {
@@ -163,10 +184,7 @@ export function ProjectList() {
             />
           </div>
           <Button className="h-10 px-4 bg-purple-600 hover:bg-purple-700 text-white"
-
-
             onClick={() => navigate("/admin/create-project")}>
-
             <Plus className="h-4 w-4 mr-2" />
             New Project
           </Button>
@@ -306,7 +324,6 @@ export function ProjectList() {
                 <p className="text-sm text-gray-500">Try adjusting your search terms or create a new project</p>
               </div>
               <Button className="bg-purple-600 hover:bg-purple-700 text-white"
-
                 onClick={() => navigate("/admin/create-project")}>
                 <Plus className="h-4 w-4 mr-2" />
                 Create New Project
