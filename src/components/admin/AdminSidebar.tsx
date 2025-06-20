@@ -203,7 +203,7 @@ export function AdminSidebar({ activeSection, setActiveSection }: AdminSidebarPr
         {!isCollapsed && (
           <div className="flex items-center space-x-2">
             <Zap className="h-8 w-8 text-blue-400" />
-            <span className="text-xl font-bold">AI WebGen</span>
+            <span className="text-xl font-bold">WebGen.ai</span>
           </div>
         )}
         <button
