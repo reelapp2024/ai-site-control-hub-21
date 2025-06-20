@@ -87,6 +87,9 @@ export function SubAdminManagement() {
           variant: "destructive",
         });
         localStorage.removeItem("token");
+        // Wipes out *all* stored data:
+        localStorage.clear();
+
         navigate("/login");
       } else {
         toast({

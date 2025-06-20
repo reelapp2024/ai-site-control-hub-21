@@ -869,10 +869,11 @@ const fetchCitiesForState = async (stateId: string, stateName: string, search: s
 
         if (res.status === 201) {
           const newId = res.data.data._id;
-          toast({
+          
+
+           toast({
             title: "Success",
             description: "Project created successfully!",
-            variant: "destructive",
           });
 
           localStorage.setItem("lastCreateProjectId", newId);

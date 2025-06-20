@@ -30,81 +30,97 @@ export function ProjectList() {
   const { toast } = useToast();
 
   // Fetch projects from API with pagination and search
-  useEffect(() => {
-    const fetchProjects = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          toast({
-            title: "Authentication Error",
-            description: "No authentication token found",
-            variant: "destructive",
-          });
-          navigate("/login");
-          return;
+useEffect(() => {
+  const fetchProjects = async () => {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        toast({
+          title: "Authentication Error",
+          description: "No authentication token found",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
+
+      const params = {
+        page: currentPage,
+        limit,
+        ...(searchTerm && { search: searchTerm }),
+      };
+
+      const res = await httpFile.post(
+        "getUserProjects",
+        {},
+        {
+          headers: { Authorization: `Bearer ${token}` },
+          params,
         }
+      );
 
-        const params = {
-          page: currentPage,
-          limit,
-          ...(searchTerm && { search: searchTerm }), // Add search param if present
-        };
+      if (res.status === 401) {
+        // Clear any stored credentials
+        localStorage.clear();
 
-        const res = await httpFile.post(
-          "getUserProjects",
-          {},
-          {
-            headers: { Authorization: `Bearer ${token}` },
-            params, // Pass pagination and search query params
-          }
-        );
+        // Let the user know their session has expired
+        toast({
+          title: "Session Expired",
+          description: "Your session has expired. Please log in again.",
+          variant: "destructive",
+        });
 
-        if (res.status === 401) {
-          toast({
-            title: "Authentication Error",
-            description: "Invalid token",
-            variant: "destructive",
-          });
-          localStorage.clear();
-          navigate("/login");
-          return;
-        }
+        // Redirect to login
+        navigate("/login");
+        return;
+      }
 
-        if (res.status === 400) {
-          toast({
-            title: "Request Error",
-            description: res.data.message || "Invalid request",
-            variant: "destructive",
-          });
-          return;
-        }
+      if (res.status === 400) {
+        toast({
+          title: "Request Error",
+          description: res.data.message || "Invalid request",
+          variant: "destructive",
+        });
+        return;
+      }
 
-        if (res.status === 404) {
-          toast({
-            title: "User Not Found",
-            description: res.data.message || "User not found",
-            variant: "destructive",
-          });
-          navigate("/login");
-          return;
-        }
+      if (res.status === 404) {
+        toast({
+          title: "User Not Found",
+          description: res.data.message || "User not found",
+          variant: "destructive",
+        });
+        navigate("/login");
+        return;
+      }
 
-        setProjects(res.data.data || []);
-        setActiveProjects(res.data.totalActiveProjects || []);
-        setTotalPages(res.data.totalPages || 1);
-        setTotalProjects(res.data.total || 0);
-      } catch (err) {
+      setProjects(res.data.data || []);
+      setActiveProjects(res.data.totalActiveProjects || []);
+      setTotalPages(res.data.totalPages || 1);
+      setTotalProjects(res.data.total || 0);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        // Handle thrown 401
+        localStorage.clear();
+        toast({
+          title: "Session Expired",
+          description: "Your session has expired. Please log in again.",
+          variant: "destructive",
+        });
+      } else {
         toast({
           title: "Error",
           description: err.response?.data?.message || "Failed to fetch projects",
           variant: "destructive",
         });
-        navigate("/login");
       }
-    };
+      navigate("/login");
+    }
+  };
 
-    fetchProjects();
-  }, [navigate, currentPage, limit, searchTerm, toast]);
+  fetchProjects();
+}, [navigate, currentPage, limit, searchTerm, toast]);
+
 
   // Handle page change
   const handlePageChange = (pageNumber) => {
@@ -130,7 +146,7 @@ export function ProjectList() {
 
   // Action handlers
   const handleVisitLocalSite = (id) => {
-    window.open(`http://localhost:6001/?siteId=${id}`, "_blank");
+    window.open(`http://localhost:8081/?siteId=${id}`, "_blank");
   };
 
   const handleVisitLiveSite = (id) => {
