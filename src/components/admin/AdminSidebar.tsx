@@ -101,6 +101,7 @@ export function AdminSidebar({ activeSection, setActiveSection }: AdminSidebarPr
         localStorage.removeItem("token");
         localStorage.removeItem("Role");
         localStorage.removeItem("adminProfile");
+        localStorage.clear();
 
         // Show a success toast
         Swal.fire({
@@ -234,7 +235,7 @@ export function AdminSidebar({ activeSection, setActiveSection }: AdminSidebarPr
                 className={cn(
                   "w-full flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors text-left",
                   activeSection === item.id ||
-                  (hasSubmenu && item.submenu?.some((sub) => activeSection === sub.id))
+                    (hasSubmenu && item.submenu?.some((sub) => activeSection === sub.id))
                     ? "bg-blue-600 text-white"
                     : "text-gray-300 hover:bg-gray-700 hover:text-white"
                 )}
@@ -245,9 +246,8 @@ export function AdminSidebar({ activeSection, setActiveSection }: AdminSidebarPr
                     <span className="flex-1">{item.label}</span>
                     {hasSubmenu && (
                       <svg
-                        className={`w-4 h-4 transition-transform ${
-                          isSubmenuOpen ? "rotate-180" : ""
-                        }`}
+                        className={`w-4 h-4 transition-transform ${isSubmenuOpen ? "rotate-180" : ""
+                          }`}
                         xmlns="http://www.w3.org/2000/svg"
                         viewBox="0 0 24 24"
                         fill="none"
