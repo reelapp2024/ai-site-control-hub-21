@@ -57,6 +57,12 @@ export function CreateProject() {
   const [fetchedCities, setFetchedCities] = useState(false);
   const [fetchedLocalAreas, setFetchedLocalAreas] = useState(false);
 
+
+
+
+
+  
+
   // With these:
   interface Country {
     countryId?: string; // Optional for manual countries
@@ -438,22 +444,22 @@ export function CreateProject() {
 
 
 
-const toggleStatePageCreation = (countryName: string, stateName: string) => {
-  const country = selectedCountries.find(c => c.name === countryName);
-  if (!country || !country.countryId) return; // Safety check
+  const toggleStatePageCreation = (countryName: string, stateName: string) => {
+    const country = selectedCountries.find(c => c.name === countryName);
+    if (!country || !country.countryId) return; // Safety check
 
-  const countryId = country.countryId;
+    const countryId = country.countryId;
 
-  // Update the state status to toggle between 1 and 0
-  setStatesByCountry((prev) => ({
-    ...prev,
-    [countryId]: prev[countryId].map((state: State) =>
-      state.name === stateName
-        ? { ...state, status: state.status === 1 ? 0 : 1 } // Toggle the status for the "Create Page" checkbox
-        : state
-    ),
-  }));
-};
+    // Update the state status to toggle between 1 and 0
+    setStatesByCountry((prev) => ({
+      ...prev,
+      [countryId]: prev[countryId].map((state: State) =>
+        state.name === stateName
+          ? { ...state, status: state.status === 1 ? 0 : 1 } // Toggle the status for the "Create Page" checkbox
+          : state
+      ),
+    }));
+  };
 
 
 
@@ -1572,51 +1578,85 @@ const toggleStatePageCreation = (countryName: string, stateName: string) => {
   };
 
 
-const selectAllStatesForCreatePage = (countryId: string) => {
-  // Ensure the country exists in selectedCountries
-  const country = selectedCountries.find((c) => c.countryId === countryId);
-  if (!country) return; // Safety check if country is not found
+  const selectAllStatesForCreatePage = (countryId: string) => {
+    // Ensure the country exists in selectedCountries
+    const country = selectedCountries.find((c) => c.countryId === countryId);
+    if (!country) return; // Safety check if country is not found
 
-  // Update the statesByCountry for the given country, setting status to 1 for all states
-  setStatesByCountry((prev) => ({
-    ...prev,
-    [countryId]: prev[countryId].map((state: State) => ({
-      ...state,
-      status: 1, // Set status to 1 (checked) for all states of this country
-    })),
-  }));
+    // Update the statesByCountry for the given country, setting status to 1 for all states
+    setStatesByCountry((prev) => ({
+      ...prev,
+      [countryId]: prev[countryId].map((state: State) => ({
+        ...state,
+        status: 1, // Set status to 1 (checked) for all states of this country
+      })),
+    }));
 
-  // Update selectedStates to include all states for this country
-  setSelectedStates((prev) => ({
-    ...prev,
-    [countryId]: prev[countryId] || statesByCountry[countryId].map((state: State) => state.name),
-  }));
-};
+    // Update selectedStates to include all states for this country
+    setSelectedStates((prev) => ({
+      ...prev,
+      [countryId]: prev[countryId] || statesByCountry[countryId].map((state: State) => state.name),
+    }));
+  };
 
-const deselectAllStatesForCreatePage = (countryId: string) => {
-  // Ensure the country exists in selectedCountries
-  const country = selectedCountries.find((c) => c.countryId === countryId);
-  if (!country) return; // Safety check if country is not found
+  const deselectAllStatesForCreatePage = (countryId: string) => {
+    // Ensure the country exists in selectedCountries
+    const country = selectedCountries.find((c) => c.countryId === countryId);
+    if (!country) return; // Safety check if country is not found
 
-  // Update the statesByCountry for the given country, setting status to 0 for all states
-  setStatesByCountry((prev) => ({
-    ...prev,
-    [countryId]: prev[countryId].map((state: State) => ({
-      ...state,
-      status: 0, // Set status to 0 (unchecked) for all states of this country
-    })),
-  }));
+    // Update the statesByCountry for the given country, setting status to 0 for all states
+    setStatesByCountry((prev) => ({
+      ...prev,
+      [countryId]: prev[countryId].map((state: State) => ({
+        ...state,
+        status: 0, // Set status to 0 (unchecked) for all states of this country
+      })),
+    }));
 
-  // Update selectedStates to remove all states for this country
-  setSelectedStates((prev) => ({
-    ...prev,
-    [countryId]: [],
-  }));
-};
-
-
+    // Update selectedStates to remove all states for this country
+    setSelectedStates((prev) => ({
+      ...prev,
+      [countryId]: [],
+    }));
+  };
 
 
+
+  const selectAllCitiesForCreatePage = (stateId: string) => {
+    setCitiesByState((prev) => {
+      const updated = { ...prev };
+      Object.keys(updated).forEach((stateName) => {
+        const state = statesByCountry[selectedCountries.find((c) => c.countryId)?.countryId]?.find(
+          (s: State) => s.id === stateId
+        );
+        if (state && state.name === stateName) {
+          updated[stateName] = updated[stateName].map((city: City) => ({
+            ...city,
+            status: 1, // Set status to 1 (checked) for all cities in this state
+          }));
+        }
+      });
+      return updated;
+    });
+  };
+
+  const deselectAllCitiesForCreatePage = (stateId: string) => {
+    setCitiesByState((prev) => {
+      const updated = { ...prev };
+      Object.keys(updated).forEach((stateName) => {
+        const state = statesByCountry[selectedCountries.find((c) => c.countryId)?.countryId]?.find(
+          (s: State) => s.id === stateId
+        );
+        if (state && state.name === stateName) {
+          updated[stateName] = updated[stateName].map((city: City) => ({
+            ...city,
+            status: 0, // Set status to 0 (unchecked) for all cities in this state
+          }));
+        }
+      });
+      return updated;
+    });
+  };
 
 
 
@@ -1950,10 +1990,7 @@ const deselectAllStatesForCreatePage = (countryId: string) => {
                   state.name.toLowerCase().includes((stateInput[country.name] || "").toLowerCase())
                 );
                 return (
-                  <div
-                    key={countryId}
-                    className="border p-4 rounded-md"
-                  >
+                  <div key={countryId} className="border p-4 rounded-md">
                     <h4 className="font-medium mb-2">{country.name}</h4>
 
                     <div className="space-y-2">
@@ -1998,7 +2035,10 @@ const deselectAllStatesForCreatePage = (countryId: string) => {
                         </div>
                         <div className="space-y-2">
                           {filteredStates.map((state: State) => (
-                            <div key={state.id || state.name} className="border p-3 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors">
+                            <div
+                              key={state.id || state.name}
+                              className="border p-3 rounded-md bg-gray-50 hover:bg-gray-100 transition-colors"
+                            >
                               <div className="flex items-center justify-between">
                                 <button
                                   type="button"
@@ -2023,29 +2063,23 @@ const deselectAllStatesForCreatePage = (countryId: string) => {
                     )}
 
                     <div className="mt-4">
-                      <div className="flex space-x-2 mt-4">
-         <Button
-  type="button"
-  variant="outline"
-  size="sm"
-  onClick={() => selectAllStatesForCreatePage(country.countryId)}  // Using countryId here
->
-  Select All (Create Page)
-</Button>
-
-
-
-      <Button
-  type="button"
-  variant="outline"
-  size="sm"
-  onClick={() => deselectAllStatesForCreatePage(country.countryId)}  // Using countryId here
->
-  Deselect All (Create Page)
-</Button>
-
-
-
+                      <div className="flex space-x-2 mb-3">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => selectAllStatesForCreatePage(country.countryId)}
+                        >
+                          Select All (Create Page)
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => deselectAllStatesForCreatePage(country.countryId)}
+                        >
+                          Deselect All (Create Page)
+                        </Button>
                       </div>
 
                       <h4 className="text-sm font-medium mb-2">Selected States ({selectedStates[country.name]?.length || 0})</h4>
@@ -2057,19 +2091,27 @@ const deselectAllStatesForCreatePage = (countryId: string) => {
                               <div key={stateName} className="flex items-center justify-between p-3 bg-white rounded border">
                                 <span className="font-medium">{stateName}</span>
                                 <div className="flex items-center space-x-3">
-                                  <Checkbox
-                                    id={`page-${country.name}-${stateName}`}
-                                    checked={state?.status === 1} // If status is 1, checkbox is checked
-                                    onCheckedChange={() => toggleStatePageCreation(country.name, stateName)}
-                                  />
-                                  <label
-                                    htmlFor={`page-${country.name}-${stateName}`}
-                                    className="text-xs text-blue-600 cursor-pointer"
+                                  <div className="flex items-center space-x-2">
+                                    <Checkbox
+                                      id={`page-${country.name}-${stateName}`}
+                                      checked={state?.status === 1}
+                                      onCheckedChange={() => toggleStatePageCreation(country.name, stateName)}
+                                    />
+                                    <label
+                                      htmlFor={`page-${country.name}-${stateName}`}
+                                      className="text-xs text-blue-600 cursor-pointer"
+                                    >
+                                      Create page
+                                    </label>
+                                  </div>
+                                  <button
+                                    type="button"
+                                    onClick={() => removeState(country.name, stateName)}
+                                    className="text-gray-500 hover:text-red-500"
                                   >
-                                    Create page
-                                  </label>
+                                    <X className="h-4 w-4" />
+                                  </button>
                                 </div>
-
                               </div>
                             );
                           })
@@ -2113,10 +2155,6 @@ const deselectAllStatesForCreatePage = (countryId: string) => {
                         <Label>Search or Add City</Label>
                         <div className="relative">
                           <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
-
-
-
-
                           <Input
                             placeholder={`Search or add city for ${state}`}
                             value={cityInput[state] || ""}
@@ -2134,12 +2172,6 @@ const deselectAllStatesForCreatePage = (countryId: string) => {
                             }}
                             className="pl-10"
                           />
-
-
-
-
-
-
                         </div>
                         <p className="text-xs text-gray-500">
                           Type to search existing cities or enter a new city name and press Enter to add it
@@ -2147,10 +2179,6 @@ const deselectAllStatesForCreatePage = (countryId: string) => {
                       </div>
 
                       {loading && <div className="text-sm text-gray-500">Loading cities...</div>}
-
-
-
-
 
                       {filteredCities.length > 0 ? (
                         <div className="border rounded-lg p-4 max-h-96 overflow-y-auto mt-4">
@@ -2199,6 +2227,24 @@ const deselectAllStatesForCreatePage = (countryId: string) => {
                       )}
 
                       <div className="mt-4">
+                        <div className="flex space-x-2 mb-3">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => selectAllCitiesForCreatePage(stateId)}
+                          >
+                            Select All (Create Page)
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            onClick={() => deselectAllCitiesForCreatePage(stateId)}
+                          >
+                            Deselect All (Create Page)
+                          </Button>
+                        </div>
                         <h4 className="text-sm font-medium mb-2">Selected Cities ({selectedCities[state]?.length || 0})</h4>
                         <div className="space-y-2 max-h-64 overflow-y-auto">
                           {selectedCities[state]?.length > 0 ? (
@@ -2237,16 +2283,6 @@ const deselectAllStatesForCreatePage = (countryId: string) => {
                           )}
                         </div>
                       </div>
-
-
-
-
-
-
-
-
-
-
                     </div>
                   );
                 })
