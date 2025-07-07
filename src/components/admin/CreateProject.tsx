@@ -21,7 +21,7 @@ export function CreateProject() {
   const [serviceType, setServiceType] = useState("");
   const [wantImages, setWantImages] = useState<boolean>(false);
   const [showSuccess, setShowSuccess] = useState(false);
- const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState<boolean>(false);
   const [loadingLocalAreas, setLoadingLocalAreas] = useState<boolean>(false); // Already boolean, ensure consistency
   const [submitting, setSubmitting] = useState<boolean>(false); // Already boolean, ensure consistency
 
@@ -90,7 +90,7 @@ export function CreateProject() {
 
   const [selectedStates, setSelectedStates] = useState<{ [country: string]: string[] }>({});
   const [stateInput, setStateInput] = useState<{ [country: string]: string }>({});
-const [statesByCountry, setStatesByCountry] = useState({});
+  const [statesByCountry, setStatesByCountry] = useState({});
 
   const [loadingStates, setLoadingStates] = useState<boolean>(false); // To show loading state
 
@@ -137,100 +137,100 @@ const [statesByCountry, setStatesByCountry] = useState({});
     }
   }, []); // Empty dependency array to run only on mount
 
- const fetchStatesForCountry = async (countryId: string) => {
-  setLoading(true); // Changed from true to 1
-  try {
-    const token = localStorage.getItem("token");
-    const res = await httpFile.get("/fetch_states", {
-      headers: { Authorization: `Bearer ${token}` },
-      params: { country_ids: countryId },
-    });
+  const fetchStatesForCountry = async (countryId: string) => {
+    setLoading(true); // Changed from true to 1
+    try {
+      const token = localStorage.getItem("token");
+      const res = await httpFile.get("/fetch_states", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { country_ids: countryId },
+      });
 
-    console.log("FetchStates Response:", {
-      countryId,
-      status: res.status,
-      data: res.data,
-    });
+      console.log("FetchStates Response:", {
+        countryId,
+        status: res.status,
+        data: res.data,
+      });
 
-    const states: State[] = res.data.data?.map((item: any) => ({
-      id: item.id,
-      name: item.name,
-      country_id: countryId,
-      status: item.status !== undefined ? item.status : 0,
-    })) || [];
-    setStatesByCountry((prev) => ({
-      ...prev,
-      [countryId]: states,
-    }));
-  } catch (err: any) {
-    console.error("FetchStates Error:", err);
-    toast({
-      title: "Error",
-      description: err.response?.data?.message || "Failed to fetch states.",
-      variant: "destructive",
-    });
-  } finally {
-    setLoading(false); // Changed from false to 0
-  }
-};
-
-
-
-
-
-
-
-
-
-
-
-
-const fetchCitiesForState = async (stateId: string, stateName: string, search: string = "") => {
-  setLoading(true); // Changed from true to 1
-  try {
-    const token = localStorage.getItem("token");
-    const res = await httpFile.get("/fetch_cities", {
-      headers: { Authorization: `Bearer ${token}` },
-      params: { state_ids: stateId, search },
-    });
-
-    console.log("FetchCities Response:", {
-      stateId,
-      stateName,
-      status: res.status,
-      data: res.data,
-    });
-
-    const cities: City[] = res.data.data?.map((item: any) => ({
-      id: item.id,
-      name: item.name,
-      state_id: stateId,
-      manual: false,
-      status: item.status !== undefined ? item.status : 0,
-    })) || [];
-
-    // Deduplicate cities based on name
-    setCitiesByState((prev) => {
-      const existingCities = prev[stateName] || [];
-      const newCities = cities.filter(
-        (city) => !existingCities.some((c: City) => c.name === city.name)
-      );
-      return {
+      const states: State[] = res.data.data?.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        country_id: countryId,
+        status: item.status !== undefined ? item.status : 0,
+      })) || [];
+      setStatesByCountry((prev) => ({
         ...prev,
-        [stateName]: [...existingCities, ...newCities],
-      };
-    });
-  } catch (err: any) {
-    console.error("FetchCities Error:", err);
-    toast({
-      title: "Error",
-      description: err.response?.data?.message || "Failed to fetch cities.",
-      variant: "destructive",
-    });
-  } finally {
-    setLoading(false); // Changed from false to 0
-  }
-};
+        [countryId]: states,
+      }));
+    } catch (err: any) {
+      console.error("FetchStates Error:", err);
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || "Failed to fetch states.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false); // Changed from false to 0
+    }
+  };
+
+
+
+
+
+
+
+
+
+
+
+
+  const fetchCitiesForState = async (stateId: string, stateName: string, search: string = "") => {
+    setLoading(true); // Changed from true to 1
+    try {
+      const token = localStorage.getItem("token");
+      const res = await httpFile.get("/fetch_cities", {
+        headers: { Authorization: `Bearer ${token}` },
+        params: { state_ids: stateId, search },
+      });
+
+      console.log("FetchCities Response:", {
+        stateId,
+        stateName,
+        status: res.status,
+        data: res.data,
+      });
+
+      const cities: City[] = res.data.data?.map((item: any) => ({
+        id: item.id,
+        name: item.name,
+        state_id: stateId,
+        manual: false,
+        status: item.status !== undefined ? item.status : 0,
+      })) || [];
+
+      // Deduplicate cities based on name
+      setCitiesByState((prev) => {
+        const existingCities = prev[stateName] || [];
+        const newCities = cities.filter(
+          (city) => !existingCities.some((c: City) => c.name === city.name)
+        );
+        return {
+          ...prev,
+          [stateName]: [...existingCities, ...newCities],
+        };
+      });
+    } catch (err: any) {
+      console.error("FetchCities Error:", err);
+      toast({
+        title: "Error",
+        description: err.response?.data?.message || "Failed to fetch cities.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false); // Changed from false to 0
+    }
+  };
 
 
   const fetchProjectDetails = async () => {
@@ -438,19 +438,24 @@ const fetchCitiesForState = async (stateId: string, stateName: string, search: s
 
 
 
-  const toggleStatePageCreation = (countryName: string, stateName: string) => {
-    const country = selectedCountries.find((c) => c.name === countryName);
-    if (!country || !country.countryId) return; // Safety check
-    const countryId = country.countryId;
-    setStatesByCountry((prev) => ({
-      ...prev,
-      [countryId]: prev[countryId].map((state: State) =>
-        state.name === stateName
-          ? { ...state, status: state.status === 1 ? 0 : 1 }
-          : state
-      ),
-    }));
-  };
+const toggleStatePageCreation = (countryName: string, stateName: string) => {
+  const country = selectedCountries.find(c => c.name === countryName);
+  if (!country || !country.countryId) return; // Safety check
+
+  const countryId = country.countryId;
+
+  // Update the state status to toggle between 1 and 0
+  setStatesByCountry((prev) => ({
+    ...prev,
+    [countryId]: prev[countryId].map((state: State) =>
+      state.name === stateName
+        ? { ...state, status: state.status === 1 ? 0 : 1 } // Toggle the status for the "Create Page" checkbox
+        : state
+    ),
+  }));
+};
+
+
 
   const toggleCityPageCreation = (stateName: string, cityName: string) => {
     setCitiesByState((prev) => ({
@@ -869,9 +874,9 @@ const fetchCitiesForState = async (stateId: string, stateName: string, search: s
 
         if (res.status === 201) {
           const newId = res.data.data._id;
-          
 
-           toast({
+
+          toast({
             title: "Success",
             description: "Project created successfully!",
           });
@@ -992,6 +997,9 @@ const fetchCitiesForState = async (stateId: string, stateName: string, search: s
           }
         });
       });
+
+
+
 
       try {
         const res = await httpFile.post(
@@ -1312,38 +1320,38 @@ const fetchCitiesForState = async (stateId: string, stateName: string, search: s
     });
   };
 
-const selectAllStates = (countryName: string) => {
-  const country = selectedCountries.find((c) => c.name === countryName);
-  if (!country || !country.countryId) return; // Safety check
-  const countryId = country.countryId;
-  setSelectedStates((prev) => ({
-    ...prev,
-    [countryName]: (statesByCountry[countryId] || []).map((state: State) => state.name),
-  }));
-};
+  const selectAllStates = (countryName: string) => {
+    const country = selectedCountries.find((c) => c.name === countryName);
+    if (!country || !country.countryId) return; // Safety check
+    const countryId = country.countryId;
+    setSelectedStates((prev) => ({
+      ...prev,
+      [countryName]: (statesByCountry[countryId] || []).map((state: State) => state.name),
+    }));
+  };
 
-const deselectAllStates = (countryName: string) => {
-  setSelectedStates((prev) => ({
-    ...prev,
-    [countryName]: [],
-  }));
-};
+  const deselectAllStates = (countryName: string) => {
+    setSelectedStates((prev) => ({
+      ...prev,
+      [countryName]: [],
+    }));
+  };
 
-const removeState = (countryName: string, stateName: string) => {
-  const country = selectedCountries.find((c) => c.name === countryName);
-  if (!country || !country.countryId) return; // Safety check
-  const countryId = country.countryId;
-  // Optionally remove manual state from statesByCountry
-  setStatesByCountry((prev) => ({
-    ...prev,
-    [countryId]: (prev[countryId] || []).filter((s: State) => s.name !== stateName || !s.manual),
-  }));
-  // Update selectedStates
-  setSelectedStates((prev) => ({
-    ...prev,
-    [countryName]: prev[countryName]?.filter((s) => s !== stateName) || [],
-  }));
-};
+  const removeState = (countryName: string, stateName: string) => {
+    const country = selectedCountries.find((c) => c.name === countryName);
+    if (!country || !country.countryId) return; // Safety check
+    const countryId = country.countryId;
+    // Optionally remove manual state from statesByCountry
+    setStatesByCountry((prev) => ({
+      ...prev,
+      [countryId]: (prev[countryId] || []).filter((s: State) => s.name !== stateName || !s.manual),
+    }));
+    // Update selectedStates
+    setSelectedStates((prev) => ({
+      ...prev,
+      [countryName]: prev[countryName]?.filter((s) => s !== stateName) || [],
+    }));
+  };
 
   const handleCityKeyDown = (stateName: string, e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && cityInput[stateName]?.trim() !== "") {
@@ -1544,6 +1552,76 @@ const removeState = (countryName: string, stateName: string) => {
     }
   };
 
+
+  const handleSelectAllCountries = () => {
+    const updatedCountries = selectedCountries.map(country => ({
+      ...country,
+      status: 1, // Mark the 'Create Page' checkbox as checked (status = 1)
+    }));
+    setSelectedCountries(updatedCountries);
+  };
+
+
+
+  const handleDeselectAllCountries = () => {
+    const updatedCountries = selectedCountries.map(country => ({
+      ...country,
+      status: 0, // Mark the 'Create Page' checkbox as unchecked (status = 0)
+    }));
+    setSelectedCountries(updatedCountries);
+  };
+
+
+const selectAllStatesForCreatePage = (countryId: string) => {
+  // Ensure the country exists in selectedCountries
+  const country = selectedCountries.find((c) => c.countryId === countryId);
+  if (!country) return; // Safety check if country is not found
+
+  // Update the statesByCountry for the given country, setting status to 1 for all states
+  setStatesByCountry((prev) => ({
+    ...prev,
+    [countryId]: prev[countryId].map((state: State) => ({
+      ...state,
+      status: 1, // Set status to 1 (checked) for all states of this country
+    })),
+  }));
+
+  // Update selectedStates to include all states for this country
+  setSelectedStates((prev) => ({
+    ...prev,
+    [countryId]: prev[countryId] || statesByCountry[countryId].map((state: State) => state.name),
+  }));
+};
+
+const deselectAllStatesForCreatePage = (countryId: string) => {
+  // Ensure the country exists in selectedCountries
+  const country = selectedCountries.find((c) => c.countryId === countryId);
+  if (!country) return; // Safety check if country is not found
+
+  // Update the statesByCountry for the given country, setting status to 0 for all states
+  setStatesByCountry((prev) => ({
+    ...prev,
+    [countryId]: prev[countryId].map((state: State) => ({
+      ...state,
+      status: 0, // Set status to 0 (unchecked) for all states of this country
+    })),
+  }));
+
+  // Update selectedStates to remove all states for this country
+  setSelectedStates((prev) => ({
+    ...prev,
+    [countryId]: [],
+  }));
+};
+
+
+
+
+
+
+
+
+
   const resetForm = () => {
     setSelectedCountries([]);
     setCountrySearchInput("");
@@ -1700,11 +1778,11 @@ const removeState = (countryName: string, stateName: string) => {
               />
             </div>
             <div className="flex items-center space-x-2">
-           <Checkbox
-  id="wantImages"
-  checked={wantImages}
-  onCheckedChange={(checked) => setWantImages(!!checked)}
-/>
+              <Checkbox
+                id="wantImages"
+                checked={wantImages}
+                onCheckedChange={(checked) => setWantImages(!!checked)}
+              />
               <label
                 htmlFor="wantImages"
                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -1798,6 +1876,25 @@ const removeState = (countryName: string, stateName: string) => {
               </div>
 
               <div>
+                <div className="flex space-x-2 mt-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleSelectAllCountries()}
+                  >
+                    Select All (Create Page)
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => handleDeselectAllCountries()}
+                  >
+                    Deselect All (Create Page)
+                  </Button>
+                </div>
+
                 <h4 className="text-sm font-medium mb-2">Selected Countries ({selectedCountries.length})</h4>
                 <div className="space-y-2 max-h-64 overflow-y-auto">
                   {selectedCountries.map((country) => (
@@ -1926,6 +2023,31 @@ const removeState = (countryName: string, stateName: string) => {
                     )}
 
                     <div className="mt-4">
+                      <div className="flex space-x-2 mt-4">
+         <Button
+  type="button"
+  variant="outline"
+  size="sm"
+  onClick={() => selectAllStatesForCreatePage(country.countryId)}  // Using countryId here
+>
+  Select All (Create Page)
+</Button>
+
+
+
+      <Button
+  type="button"
+  variant="outline"
+  size="sm"
+  onClick={() => deselectAllStatesForCreatePage(country.countryId)}  // Using countryId here
+>
+  Deselect All (Create Page)
+</Button>
+
+
+
+                      </div>
+
                       <h4 className="text-sm font-medium mb-2">Selected States ({selectedStates[country.name]?.length || 0})</h4>
                       <div className="space-y-2 max-h-64 overflow-y-auto">
                         {selectedStates[country.name]?.length > 0 ? (
@@ -1935,27 +2057,19 @@ const removeState = (countryName: string, stateName: string) => {
                               <div key={stateName} className="flex items-center justify-between p-3 bg-white rounded border">
                                 <span className="font-medium">{stateName}</span>
                                 <div className="flex items-center space-x-3">
-                                  <div className="flex items-center space-x-2">
-                                    <Checkbox
-                                      id={`page-${country.name}-${stateName}`}
-                                      checked={state?.status === 1}
-                                      onCheckedChange={() => toggleStatePageCreation(country.name, stateName)}
-                                    />
-                                    <label
-                                      htmlFor={`page-${country.name}-${stateName}`}
-                                      className="text-xs text-blue-600 cursor-pointer"
-                                    >
-                                      Create page
-                                    </label>
-                                  </div>
-                                  <button
-                                    type="button"
-                                    onClick={() => toggleState(country.name, stateName)}
-                                    className="text-gray-500 hover:text-red-500"
+                                  <Checkbox
+                                    id={`page-${country.name}-${stateName}`}
+                                    checked={state?.status === 1} // If status is 1, checkbox is checked
+                                    onCheckedChange={() => toggleStatePageCreation(country.name, stateName)}
+                                  />
+                                  <label
+                                    htmlFor={`page-${country.name}-${stateName}`}
+                                    className="text-xs text-blue-600 cursor-pointer"
                                   >
-                                    <X className="h-4 w-4" />
-                                  </button>
+                                    Create page
+                                  </label>
                                 </div>
+
                               </div>
                             );
                           })

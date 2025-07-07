@@ -9,10 +9,17 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
   },
+  build: {
+    // Emit code compatible with React Snap's Chromium
+    target: "es2020",
+    // Match your postbuild/react-snap source
+    outDir: "dist",
+    // Raise the warning threshold if you have big chunks
+    chunkSizeWarningLimit: 2000,
+  },
   plugins: [
     react(),
-    mode === 'development' &&
-    componentTagger(),
+    mode === "development" && componentTagger(),
   ].filter(Boolean),
   resolve: {
     alias: {
